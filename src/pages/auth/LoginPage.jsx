@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -16,15 +15,18 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   if (isAuthenticated) {
-    const dest = user?.role === 'MANAGER'
-  ? '/manager/all-requests'
-  : '/employee/my-requests'
+    const dest =
+      user?.role === 'MANAGER'
+        ? '/manager/all-requests'
+        : user?.role === 'REVIEWER'
+        ? '/reviewer/queue'     
+        : '/employee/my-requests'
     return <Navigate to={dest} replace />
   }
 
   const handleChange = (e) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-    setError('') 
+    setError('')
   }
 
   const handleSubmit = async (e) => {
@@ -40,11 +42,13 @@ export default function LoginPage() {
       const loggedInUser = await login(form.username, form.password)
       toast.success(`Welcome back, ${loggedInUser.name.split(' ')[0]}!`)
 
-if (loggedInUser.role === 'MANAGER') {
-  navigate('/manager/all-requests')
-} else {
-  navigate('/employee/my-requests')
-}
+      if (loggedInUser.role === 'MANAGER') {
+        navigate('/manager/all-requests')
+      } else if (loggedInUser.role === 'REVIEWER') {
+        navigate('/reviewer/queue')   
+      } else {
+        navigate('/employee/my-requests')
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -54,43 +58,41 @@ if (loggedInUser.role === 'MANAGER') {
 
   const fillDemo = (role) => {
     if (role === 'employee') {
-      setForm({ username: 'employee', password: 'password' })
+      setForm({ username: 'alice', password: 'alice123' })
+    } else if (role === 'manager') {
+      setForm({ username: 'bob', password: 'bob123' })
     } else {
-      setForm({ username: 'manager', password: 'password' })
+      setForm({ username: 'reviewer1', password: 'rev123' })
     }
     setError('')
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 flex items-center justify-center p-4">
-    
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md animate-slide-up">
-        
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden">
-          
           <div className="h-1 bg-gradient-to-r from-brand-500 via-violet-500 to-brand-600" />
 
           <div className="p-8">
-
-            
             <div className="mb-6">
               <h2 className="font-display text-2xl font-bold text-slate-900">Sign in</h2>
               <p className="text-sm text-slate-500 mt-1">Enter your credentials to continue</p>
             </div>
 
-            
+            {/* Demo fill buttons */}
             <div className="flex gap-2 mb-6">
               <button
                 type="button"
                 onClick={() => fillDemo('employee')}
                 className="flex-1 text-xs py-2 px-3 rounded-xl border border-brand-200 bg-brand-50 text-brand-700 font-medium hover:bg-brand-100 transition-colors"
               >
-                Employee 
+                Employee
               </button>
               <button
                 type="button"
@@ -99,11 +101,16 @@ if (loggedInUser.role === 'MANAGER') {
               >
                 Manager
               </button>
+              <button
+                type="button"
+                onClick={() => fillDemo('reviewer')}
+                className="flex-1 text-xs py-2 px-3 rounded-xl border border-teal-200 bg-teal-50 text-teal-700 font-medium hover:bg-teal-100 transition-colors"
+              >
+                Reviewer
+              </button>
             </div>
 
-            
             <form onSubmit={handleSubmit} className="space-y-4">
-              
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5" htmlFor="username">
                   Username
@@ -127,7 +134,6 @@ if (loggedInUser.role === 'MANAGER') {
                 </div>
               </div>
 
-              
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5" htmlFor="password">
                   Password
@@ -167,7 +173,6 @@ if (loggedInUser.role === 'MANAGER') {
                 </div>
               </div>
 
-              
               {error && (
                 <div className="flex items-start gap-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700 animate-fade-in">
                   <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -177,7 +182,6 @@ if (loggedInUser.role === 'MANAGER') {
                 </div>
               )}
 
-              
               <button
                 type="submit"
                 disabled={isLoading}
@@ -199,7 +203,6 @@ if (loggedInUser.role === 'MANAGER') {
               </button>
             </form>
           </div>
-
         </div>
       </div>
     </div>

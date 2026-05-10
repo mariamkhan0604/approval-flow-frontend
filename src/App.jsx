@@ -1,8 +1,6 @@
-
-
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-
+import ReviewerHistoryPage from './pages/reviewer/ReviewerHistoryPage'
 import { AuthProvider } from './context/AuthContext'
 import { RequestsProvider } from './context/RequestsContext'
 import { ToastProvider } from './context/ToastContext'
@@ -13,13 +11,13 @@ import DashboardLayout from './layouts/DashboardLayout'
 
 import LoginPage from './pages/auth/LoginPage'
 
-
-
 import CreateRequestPage from './pages/employee/CreateRequestPage'
 import MyRequestsPage from './pages/employee/MyRequestsPage'
 
-
 import AllRequestsPage from './pages/manager/AllRequestsPage'
+
+// Reviewer Pages
+import ReviewerQueuePage from './pages/reviewer/ReviewerQueuePage'
 
 export default function App() {
   return (
@@ -29,16 +27,15 @@ export default function App() {
 
           <Routes>
 
-            
+            {/* Login */}
             <Route path="/login" element={<LoginPage />} />
 
-            
+            {/* Default Redirect */}
             <Route path="/" element={<Navigate to="/login" replace />} />
 
-            
+            {/* Employee Routes */}
             <Route element={<ProtectedRoute requiredRole="EMPLOYEE" />}>
 
-              
               <Route element={<DashboardLayout />}>
 
                 <Route
@@ -54,10 +51,9 @@ export default function App() {
               </Route>
             </Route>
 
-            
+            {/* Manager Routes */}
             <Route element={<ProtectedRoute requiredRole="MANAGER" />}>
 
-              
               <Route element={<DashboardLayout />}>
 
                 <Route
@@ -68,7 +64,23 @@ export default function App() {
               </Route>
             </Route>
 
-       
+            {/* Reviewer Routes */}
+            <Route element={<ProtectedRoute requiredRole="REVIEWER" />}>
+
+              <Route element={<DashboardLayout />}>
+
+               
+                <Route
+                  path="/reviewer/queue"
+                  element={<ReviewerQueuePage />}
+                />
+                <Route 
+                path="/reviewer/history" 
+                element={<ReviewerHistoryPage />} 
+                />
+
+              </Route>
+            </Route>
 
           </Routes>
 

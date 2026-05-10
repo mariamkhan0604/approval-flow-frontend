@@ -1,10 +1,8 @@
-
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import Avatar from '../ui/Avatar'
-
 
 const EMPLOYEE_NAV = [
   {
@@ -39,12 +37,53 @@ const MANAGER_NAV = [
   },
 ]
 
+const REVIEWER_NAV = [
+  {
+    label: 'Review Queue',
+    to: '/reviewer/queue',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
+    label: 'History',
+    to: '/reviewer/history',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+]
+
 export default function Sidebar() {
-  const { user, logout, isEmployee } = useAuth()
+  const { user, logout, isEmployee, isManager, isReviewer } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
 
-  const navItems = isEmployee ? EMPLOYEE_NAV : MANAGER_NAV
+  const navItems = isEmployee
+    ? EMPLOYEE_NAV
+    : isManager
+    ? MANAGER_NAV
+    : isReviewer
+    ? REVIEWER_NAV
+    : []
+
+  const roleLabel = isEmployee
+    ? 'Employee'
+    : isManager
+    ? 'Manager'
+    : isReviewer
+    ? 'Reviewer'
+    : ''
+
+  const roleBadgeClass = isEmployee
+    ? 'bg-brand-50 text-brand-700 border border-brand-200'
+    : isManager
+    ? 'bg-violet-50 text-violet-700 border border-violet-200'
+    : 'bg-teal-50 text-teal-700 border border-teal-200'   // reviewer = teal
 
   const handleLogout = async () => {
     await logout()
@@ -57,16 +96,14 @@ export default function Sidebar() {
 
       <nav className="flex-1 p-4 overflow-y-auto">
         <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 px-1">
-          {isEmployee ? 'Employee' : 'Manager'} Menu
+          {roleLabel} Menu
         </p>
         <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
-                className={({ isActive }) =>
-                  `nav-item ${isActive ? 'active' : ''}`
-                }
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -76,14 +113,8 @@ export default function Sidebar() {
         </ul>
 
         <div className="mt-6 mx-1">
-          <div className={`
-            text-xs px-3 py-2 rounded-xl font-medium text-center
-            ${isEmployee
-              ? 'bg-brand-50 text-brand-700 border border-brand-200'
-              : 'bg-violet-50 text-violet-700 border border-violet-200'
-            }
-          `}>
-            {isEmployee ? 'Employee View' : ' Manager View'}
+          <div className={`text-xs px-3 py-2 rounded-xl font-medium text-center ${roleBadgeClass}`}>
+            {roleLabel} View
           </div>
         </div>
       </nav>
@@ -93,7 +124,6 @@ export default function Sidebar() {
           <Avatar name={user?.name} size="md" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-800 truncate">{user?.name}</p>
-            
           </div>
         </div>
         <button
